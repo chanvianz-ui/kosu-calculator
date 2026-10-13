@@ -64,6 +64,18 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"calculator" | "history">("calculator");
   const [hydrated, setHydrated] = useState(false);
   const [message, setMessage] = useState("");
+  // Stok harian sengaja tidak disimpan ke localStorage agar selalu kosong saat membuka ulang.
+  const [stock, setStock] = useState({
+    fmUtuh: "", fmSisa: "", fmKosuSisa: "",
+    creamerKotak1: "", creamerKotak2: "", creamerSisa: "", creamerKosuSisa: "",
+    kopiUtuh: "", kopiSisa: "", kopiKosuSisa: "",
+    richmilkUtuh: "", richmilkSisa: "",
+    oatmilkUtuh: "", oatmilkSisa: "",
+  });
+
+  function updateStock(key: keyof typeof stock, value: string) {
+    setStock((current) => ({ ...current, [key]: value }));
+  }
 
   useEffect(() => {
     try {
@@ -150,22 +162,55 @@ export default function Home() {
   }
 
   async function copySummary() {
-    if (!inputValid || remainder === null || percentage === null) return;
+    if (!inputValid || remainder === null || percentage === null) {
+      setMessage("Isi berat baskom dan teko dengan angka yang valid terlebih dahulu.");
+      return;
+    }
+    const val = (key: keyof typeof stock) => numberValue(stock[key]);
+    const has = (key: keyof typeof stock) => stock[key].trim() !== "";
+    const fmt = (n: number) => formatNumber(n, 0);
+    const fmTotal = val("fmUtuh") + val("fmSisa") + numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? "") + val("fmKosuSisa");
+    const creamerBoxes = val("creamerKotak1") + val("creamerKotak2");
+    const creamerUtuhMl = creamerBoxes * 500;
+    const creamerTotal = creamerUtuhMl + val("creamerSisa") + numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? "") + val("creamerKosuSisa");
+    const kopiTotal = val("kopiUtuh") + val("kopiSisa") + numberValue(ingredients.find((x) => x.id === "kopi")?.recipe ?? "") + val("kopiKosuSisa");
+    const richmilkTotal = val("richmilkUtuh") + val("richmilkSisa");
+    const oatmilkTotal = val("oatmilkUtuh") + val("oatmilkSisa");
     const lines = [
-      `HITUNGAN KOSU ${formatDate(date)}`,
-      `Kosu utuh (patokan): ${formatNumber(patokanNum, 0)}`,
-      `Baskom bersih: ${formatNumber(basketNet!, 2)} gr`,
-      `Teko bersih: ${formatNumber(pitcherNet!, 2)} gr`,
-      `Total Kosu sisa: ${formatNumber(remainder, 2)} gr`,
-      `Persentase Kosu: ${formatNumber(percentage, 2)}%`,
+      `*HITUNGAN KOSU (${formatDate(date)})*`,
       "",
-      ...calculatedIngredients.map((item) => `${item.name}: ${item.result === null ? "takaran belum diisi" : formatNumber(item.result, 2)}`),
+      `fm utuh: ${fmt(val("fmUtuh"))}`,
+      `fm sisa: ${fmt(val("fmSisa"))}`,
+      `fm kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? ""))}`,
+      `fm kosu sisa: ${fmt(val("fmKosuSisa"))}`,
+      `total: ${fmt(fmTotal)}`,
+      "",
+      `creamer utuh: ${val("creamerKotak1")}+${val("creamerKotak2")}=${creamerBoxes} ${creamerBoxes}x500=${fmt(creamerUtuhMl)}`,
+      `creamer sisa: ${fmt(val("creamerSisa"))}`,
+      `creamer kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? ""))}`,
+      `creamer kosu sisa: ${fmt(val("creamerKosuSisa"))}`,
+      `total: ${fmt(creamerUtuhMl)}+${fmt(val("creamerSisa"))}+${fmt(numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? ""))}+${fmt(val("creamerKosuSisa"))}=${fmt(creamerTotal)}`,
+      "",
+      `kopi utuh: ${fmt(val("kopiUtuh"))}`,
+      `kopi sisa: ${fmt(val("kopiSisa"))}`,
+      `kopi kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "kopi")?.recipe ?? ""))}`,
+      `kopi kosu sisa: ${fmt(val("kopiKosuSisa"))}`,
+      `total: ${fmt(kopiTotal)}`,
+      "",
+      `richmilk utuh: ${fmt(val("richmilkUtuh"))}`,
+      `richmilk sisa: ${fmt(val("richmilkSisa"))}`,
+      `total: ${fmt(richmilkTotal)}`,
+      "",
+      `oatmilk utuh: ${fmt(val("oatmilkUtuh"))}`,
+      `oatmilk sisa: ${fmt(val("oatmilkSisa"))}`,
+      `total: ${fmt(oatmilkTotal)}`,
     ];
+    // Input kosong ditampilkan sebagai 0 di laporan, dan tidak diingat untuk hitungan berikutnya.
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
-      setMessage("Ringkasan berhasil disalin.");
+      setMessage("Laporan stok berhasil disalin. Kolom stok tetap kosong saat membuka ulang website.");
     } catch {
-      setMessage("Gagal menyalin otomatis. Coba gunakan fitur Simpan ke riwayat.");
+      setMessage("Gagal menyalin otomatis. Pastikan website dibuka melalui HTTPS.");
     }
   }
 
@@ -191,13 +236,13 @@ export default function Home() {
         <div className="hero-stat">
           <span>Patokan Kosu utuh</span>
           <strong>{formatNumber(patokanNum, 0)}</strong>
-          <small>gram · bisa diubah</small>
+          <small>gram Â· bisa diubah</small>
         </div>
       </section>
 
       <nav className="tabs" aria-label="Navigasi aplikasi">
-        <button className={activeTab === "calculator" ? "tab active" : "tab"} onClick={() => setActiveTab("calculator")}> <span>◉</span> Kalkulator </button>
-        <button className={activeTab === "history" ? "tab active" : "tab"} onClick={() => setActiveTab("history")}> <span>◷</span> Riwayat <b>{history.length}</b></button>
+        <button className={activeTab === "calculator" ? "tab active" : "tab"} onClick={() => setActiveTab("calculator")}> <span>â—‰</span> Kalkulator </button>
+        <button className={activeTab === "history" ? "tab active" : "tab"} onClick={() => setActiveTab("history")}> <span>â—·</span> Riwayat <b>{history.length}</b></button>
       </nav>
 
       {activeTab === "calculator" ? (
@@ -214,14 +259,14 @@ export default function Home() {
 
             <div className="weigh-grid">
               <div className="weigh-card">
-                <div className="weigh-title"><div className="icon-box">▤</div><div><h4>Baskom</h4><p>Berat wadah {formatNumber(numberValue(tareBaskom), 0)} gr</p></div></div>
+                <div className="weigh-title"><div className="icon-box">â–¤</div><div><h4>Baskom</h4><p>Berat wadah {formatNumber(numberValue(tareBaskom), 0)} gr</p></div></div>
                 <div className="field"><label htmlFor="basketGross">Berat baskom + isi</label><div className="input-unit"><input id="basketGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 2.702" value={basketGross} onChange={(e) => setBasketGross(e.target.value)} /><span>gr</span></div></div>
-                <div className="net-line"><span>Berat bersih</span><strong>{basketNet === null ? "—" : basketNet < 0 ? "Cek angka" : `${formatNumber(basketNet)} gr`}</strong></div>
+                <div className="net-line"><span>Berat bersih</span><strong>{basketNet === null ? "â€”" : basketNet < 0 ? "Cek angka" : `${formatNumber(basketNet)} gr`}</strong></div>
               </div>
               <div className="weigh-card">
-                <div className="weigh-title"><div className="icon-box">▱</div><div><h4>Teko</h4><p>Berat wadah {formatNumber(numberValue(tareTeko), 0)} gr</p></div></div>
+                <div className="weigh-title"><div className="icon-box">â–±</div><div><h4>Teko</h4><p>Berat wadah {formatNumber(numberValue(tareTeko), 0)} gr</p></div></div>
                 <div className="field"><label htmlFor="pitcherGross">Berat teko + isi</label><div className="input-unit"><input id="pitcherGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 1.120" value={pitcherGross} onChange={(e) => setPitcherGross(e.target.value)} /><span>gr</span></div></div>
-                <div className="net-line"><span>Berat bersih</span><strong>{pitcherNet === null ? "—" : pitcherNet < 0 ? "Cek angka" : `${formatNumber(pitcherNet)} gr`}</strong></div>
+                <div className="net-line"><span>Berat bersih</span><strong>{pitcherNet === null ? "â€”" : pitcherNet < 0 ? "Cek angka" : `${formatNumber(pitcherNet)} gr`}</strong></div>
               </div>
             </div>
 
@@ -232,16 +277,16 @@ export default function Home() {
             </div>
 
             <div className="result-card">
-              <div className="result-top"><div><p className="eyebrow">HASIL HITUNG</p><h3>Total Kosu sisa</h3></div><div className="result-icon">↗</div></div>
-              <div className="result-number">{remainder === null ? "—" : inputValid ? formatNumber(remainder) : "Periksa input"} <span>gram</span></div>
-              <div className="formula-row"><span>Baskom bersih</span><strong>{basketNet === null || basketNet < 0 ? "—" : formatNumber(basketNet)} gr</strong></div>
-              <div className="formula-row"><span>Teko bersih</span><strong>{pitcherNet === null || pitcherNet < 0 ? "—" : formatNumber(pitcherNet)} gr</strong></div>
-              <div className="formula-row total"><span>Persentase Kosu sisa</span><strong>{percentage === null || !inputValid ? "—" : `${formatNumber(percentage)}%`}</strong></div>
-              <p className="formula-note">Persentase = (baskom bersih + teko bersih) ÷ patokan Kosu utuh × 100%</p>
+              <div className="result-top"><div><p className="eyebrow">HASIL HITUNG</p><h3>Total Kosu sisa</h3></div><div className="result-icon">â†—</div></div>
+              <div className="result-number">{remainder === null ? "â€”" : inputValid ? formatNumber(remainder) : "Periksa input"} <span>gram</span></div>
+              <div className="formula-row"><span>Baskom bersih</span><strong>{basketNet === null || basketNet < 0 ? "â€”" : formatNumber(basketNet)} gr</strong></div>
+              <div className="formula-row"><span>Teko bersih</span><strong>{pitcherNet === null || pitcherNet < 0 ? "â€”" : formatNumber(pitcherNet)} gr</strong></div>
+              <div className="formula-row total"><span>Persentase Kosu sisa</span><strong>{percentage === null || !inputValid ? "â€”" : `${formatNumber(percentage)}%`}</strong></div>
+              <p className="formula-note">Persentase = (baskom bersih + teko bersih) Ã· patokan Kosu utuh Ã— 100%</p>
             </div>
 
             <div className="action-row">
-              <button className="button button-primary" onClick={saveEntry} disabled={!inputValid}>Simpan ke riwayat <span>↗</span></button>
+              <button className="button button-primary" onClick={saveEntry} disabled={!inputValid}>Simpan ke riwayat <span>â†—</span></button>
               <button className="button button-secondary" onClick={copySummary} disabled={!inputValid}>Salin hasil</button>
             </div>
             {message && <p className="message" role="status">{message}</p>}
@@ -258,11 +303,46 @@ export default function Home() {
                 <div className="recipe-item" key={item.id}>
                   <div className="recipe-item-head"><div><h4>{item.name}</h4><p>{item.note}</p></div><span className="ingredient-symbol">{item.id === "fm" ? "FM" : item.id === "creamer" ? "CR" : item.id === "kopi" ? "KP" : item.id === "richmilk" ? "RM" : "OM"}</span></div>
                   <div className="field"><label htmlFor={`recipe-${item.id}`}>Takaran resep 1 batch</label><div className="input-unit"><input id={`recipe-${item.id}`} type="number" min="0" inputMode="decimal" placeholder="Isi takaran" value={item.recipe} onChange={(e) => updateIngredient(item.id, e.target.value)} /><span>gr / ml</span></div></div>
-                  <div className="recipe-result"><span>Hasil × {percentage === null || !inputValid ? "—" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "—" : formatNumber(item.result)}</strong></div>
+                  <div className="recipe-result"><span>Hasil Ã— {percentage === null || !inputValid ? "â€”" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "â€”" : formatNumber(item.result)}</strong></div>
                 </div>
               ))}
             </div>
             <div className="hint-box"><span>i</span><p>Richmilk dan oatmilk tidak memiliki takaran resep default karena rumusnya belum dikonfirmasi. Masukkan sendiri jika ingin menghitung hasil persentasenya.</p></div>
+          </section>
+
+          <section className="panel stock-panel">
+            <div className="section-heading">
+              <div><p className="eyebrow">03 / LAPORAN STOK</p><h3>Input stok harian</h3></div>
+              <span className="step-tag">Selalu kosong</span>
+            </div>
+            <p className="panel-intro">Isi stok hari ini. Kolom stok tidak disimpan dan akan kosong kembali saat website dibuka ulang. Takaran Kosu utuh diambil dari resep di atas.</p>
+            <div className="stock-grid">
+              <div className="stock-card"><h4>Fresh Milk</h4>
+                <div className="field"><label>FM utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmUtuh} onChange={(e) => updateStock("fmUtuh", e.target.value)} /></div>
+                <div className="field"><label>FM sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmSisa} onChange={(e) => updateStock("fmSisa", e.target.value)} /></div>
+                <div className="field"><label>FM Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmKosuSisa} onChange={(e) => updateStock("fmKosuSisa", e.target.value)} /></div>
+              </div>
+              <div className="stock-card"><h4>Creamer</h4>
+                <div className="stock-two"><div className="field"><label>Kotak 500 ml #1</label><input type="number" min="0" inputMode="numeric" placeholder="0" value={stock.creamerKotak1} onChange={(e) => updateStock("creamerKotak1", e.target.value)} /></div><div className="field"><label>Kotak 500 ml #2</label><input type="number" min="0" inputMode="numeric" placeholder="0" value={stock.creamerKotak2} onChange={(e) => updateStock("creamerKotak2", e.target.value)} /></div></div>
+                <div className="field"><label>Creamer sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.creamerSisa} onChange={(e) => updateStock("creamerSisa", e.target.value)} /></div>
+                <div className="field"><label>Creamer Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.creamerKosuSisa} onChange={(e) => updateStock("creamerKosuSisa", e.target.value)} /></div>
+              </div>
+              <div className="stock-card"><h4>Kopi</h4>
+                <div className="field"><label>Kopi utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiUtuh} onChange={(e) => updateStock("kopiUtuh", e.target.value)} /></div>
+                <div className="field"><label>Kopi sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiSisa} onChange={(e) => updateStock("kopiSisa", e.target.value)} /></div>
+                <div className="field"><label>Kopi Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiKosuSisa} onChange={(e) => updateStock("kopiKosuSisa", e.target.value)} /></div>
+              </div>
+              <div className="stock-card"><h4>Richmilk</h4>
+                <div className="field"><label>Richmilk utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.richmilkUtuh} onChange={(e) => updateStock("richmilkUtuh", e.target.value)} /></div>
+                <div className="field"><label>Richmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.richmilkSisa} onChange={(e) => updateStock("richmilkSisa", e.target.value)} /></div>
+              </div>
+              <div className="stock-card"><h4>Oatmilk</h4>
+                <div className="field"><label>Oatmilk utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.oatmilkUtuh} onChange={(e) => updateStock("oatmilkUtuh", e.target.value)} /></div>
+                <div className="field"><label>Oatmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.oatmilkSisa} onChange={(e) => updateStock("oatmilkSisa", e.target.value)} /></div>
+              </div>
+            </div>
+            <div className="action-row"><button className="button button-primary" onClick={copySummary} disabled={!inputValid}>Salin laporan stok <span>â†—</span></button></div>
+            {message && <p className="message" role="status">{message}</p>}
           </section>
         </div>
       ) : (
@@ -275,7 +355,7 @@ export default function Home() {
             </div>
           </div>
           {history.length === 0 ? (
-            <div className="empty-state"><div className="empty-icon">◷</div><h4>Belum ada riwayat</h4><p>Simpan hitungan dari tab Kalkulator untuk melihatnya di sini.</p><button className="button button-primary" onClick={() => setActiveTab("calculator")}>Mulai hitung</button></div>
+            <div className="empty-state"><div className="empty-icon">â—·</div><h4>Belum ada riwayat</h4><p>Simpan hitungan dari tab Kalkulator untuk melihatnya di sini.</p><button className="button button-primary" onClick={() => setActiveTab("calculator")}>Mulai hitung</button></div>
           ) : (
             <div className="history-list">
               {history.map((entry) => (
@@ -283,7 +363,7 @@ export default function Home() {
                   <div className="history-date"><span>{formatDate(entry.date)}</span><small>Patokan {formatNumber(entry.patokan, 0)}</small></div>
                   <div className="history-metric"><small>Kosu sisa</small><strong>{formatNumber(entry.remainder)} gr</strong></div>
                   <div className="history-metric"><small>Persentase</small><strong className="green-text">{formatNumber(entry.percentage)}%</strong></div>
-                  <button className="icon-button" aria-label={`Hapus riwayat ${formatDate(entry.date)}`} onClick={() => deleteEntry(entry.id)}>×</button>
+                  <button className="icon-button" aria-label={`Hapus riwayat ${formatDate(entry.date)}`} onClick={() => deleteEntry(entry.id)}>Ã—</button>
                 </article>
               ))}
             </div>
@@ -291,7 +371,7 @@ export default function Home() {
         </section>
       )}
 
-      <footer className="footer"><span>◈ KOSU CALCULATOR</span><span>Dark mode · Mobile ready · Local storage</span></footer>
+      <footer className="footer"><span>â—ˆ KOSU CALCULATOR</span><span>Dark mode Â· Mobile ready Â· Local storage</span></footer>
     </main>
   );
 }
