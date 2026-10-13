@@ -67,7 +67,7 @@ export default function Home() {
   // Stok harian sengaja tidak disimpan ke localStorage agar selalu kosong saat membuka ulang.
   const [stock, setStock] = useState({
     fmUtuh: "", fmSisa: "", fmKosuSisa: "",
-    creamerKotak1: "", creamerKotak2: "", creamerSisa: "", creamerKosuSisa: "",
+    creamerKotak: "", creamerSisa: "", creamerKosuSisa: "",
     kopiUtuh: "", kopiSisa: "", kopiKosuSisa: "",
     richmilkUtuh: "", richmilkSisa: "",
     oatmilkUtuh: "", oatmilkSisa: "",
@@ -170,14 +170,14 @@ export default function Home() {
     const has = (key: keyof typeof stock) => stock[key].trim() !== "";
     const fmt = (n: number) => formatNumber(n, 0);
     const fmTotal = val("fmUtuh") + val("fmSisa") + numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? "") + val("fmKosuSisa");
-    const creamerBoxes = val("creamerKotak1") + val("creamerKotak2");
+    const creamerBoxes = val("creamerKotak");
     const creamerUtuhMl = creamerBoxes * 500;
     const creamerTotal = creamerUtuhMl + val("creamerSisa") + numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? "") + val("creamerKosuSisa");
     const kopiTotal = val("kopiUtuh") + val("kopiSisa") + numberValue(ingredients.find((x) => x.id === "kopi")?.recipe ?? "") + val("kopiKosuSisa");
     const richmilkTotal = val("richmilkUtuh") + val("richmilkSisa");
     const oatmilkTotal = val("oatmilkUtuh") + val("oatmilkSisa");
     const lines = [
-      `*HITUNGAN KOSU (${formatDate(date)})*`,
+      `HITUNGAN KOSU (${formatDate(date)})`,
       "",
       `fm utuh: ${fmt(val("fmUtuh"))}`,
       `fm sisa: ${fmt(val("fmSisa"))}`,
@@ -185,7 +185,7 @@ export default function Home() {
       `fm kosu sisa: ${fmt(val("fmKosuSisa"))}`,
       `total: ${fmt(fmTotal)}`,
       "",
-      `creamer utuh: ${val("creamerKotak1")}+${val("creamerKotak2")}=${creamerBoxes} ${creamerBoxes}x500=${fmt(creamerUtuhMl)}`,
+      `creamer utuh: ${fmt(creamerBoxes)} kotak x 500 ml = ${fmt(creamerUtuhMl)} ml`,
       `creamer sisa: ${fmt(val("creamerSisa"))}`,
       `creamer kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? ""))}`,
       `creamer kosu sisa: ${fmt(val("creamerKosuSisa"))}`,
@@ -323,7 +323,7 @@ export default function Home() {
                 <div className="field"><label>FM Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmKosuSisa} onChange={(e) => updateStock("fmKosuSisa", e.target.value)} /></div>
               </div>
               <div className="stock-card"><h4>Creamer</h4>
-                <div className="stock-two"><div className="field"><label>Kotak 500 ml #1</label><input type="number" min="0" inputMode="numeric" placeholder="0" value={stock.creamerKotak1} onChange={(e) => updateStock("creamerKotak1", e.target.value)} /></div><div className="field"><label>Kotak 500 ml #2</label><input type="number" min="0" inputMode="numeric" placeholder="0" value={stock.creamerKotak2} onChange={(e) => updateStock("creamerKotak2", e.target.value)} /></div></div>
+                <div className="field"><label>Creamer utuh (jumlah kotak 500 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.creamerKotak} onChange={(e) => updateStock("creamerKotak", e.target.value)} /></div>
                 <div className="field"><label>Creamer sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.creamerSisa} onChange={(e) => updateStock("creamerSisa", e.target.value)} /></div>
                 <div className="field"><label>Creamer Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.creamerKosuSisa} onChange={(e) => updateStock("creamerKosuSisa", e.target.value)} /></div>
               </div>
