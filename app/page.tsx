@@ -209,8 +209,6 @@ export default function Home() {
       "",
       `kopi utuh: ${fmt(val("kopiUtuh"))}`,
       `kopi sisa: ${fmt(val("kopiSisa"))}`,
-      `kopi kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "kopi")?.recipe ?? ""))}`,
-      `kopi kosu sisa: ${fmt(val("kopiKosuSisa"))}`,
       `total: ${fmt(kopiTotal)}`,
       "",
       `richmilk utuh: ${fmt(richmilkBoxes)} kotak x 1.000 ml = ${fmt(richmilkUtuhMl)} ml`,
