@@ -79,6 +79,7 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [message, setMessage] = useState("");
   // Stok harian sengaja tidak disimpan ke localStorage agar selalu kosong saat membuka ulang.
+  const [includeFmKosuUtuh, setIncludeFmKosuUtuh] = useState(true);
   const [stock, setStock] = useState({
     fmUtuh: "", fmSisa: "",
     creamerKotak: "", creamerSisa: "",
@@ -224,7 +225,7 @@ export default function Home() {
     const fmUtuhMl = fmBoxes * 946;
     const fmKosuUtuh = recipeValue("fm");
     const fmKosuSisa = recipeResult("fm");
-    const fmTotal = fmUtuhMl + val("fmSisa") + fmKosuUtuh + (kosuCalculated ? fmKosuSisa : 0);
+    const fmTotal = fmUtuhMl + val("fmSisa") + (includeFmKosuUtuh ? fmKosuUtuh : 0) + (kosuCalculated ? fmKosuSisa : 0);
     const creamerBoxes = val("creamerKotak");
     const creamerUtuhMl = creamerBoxes * 500;
     const creamerKosuUtuh = recipeValue("creamer");
@@ -245,9 +246,11 @@ export default function Home() {
       `HITUNGAN KOSU (${formatDate(date)})`,
       `fm utuh: ${fmt(fmUtuhMl)}`,
       `fm sisa: ${fmt(val("fmSisa"))}`,
-      `fm kosu utuh: ${fmt(fmKosuUtuh)}`,
+      ...(includeFmKosuUtuh ? [`fm kosu utuh: ${fmt(fmKosuUtuh)}`] : []),
       ...(kosuCalculated ? [`fm kosu sisa: ${fmt(fmKosuSisa)}`] : []),
-      `total: ${fmt(fmTotal)}`,
+      includeFmKosuUtuh
+        ? `total: ${fmt(fmTotal)}`
+        : `total: ${fmt(fmUtuhMl)} + ${fmt(val("fmSisa"))}${kosuCalculated ? ` + ${fmt(fmKosuSisa)}` : ""} = ${fmt(fmTotal)}`,
       "",
       `creamer utuh: ${fmt(creamerBoxes)} kotak x 500 ml = ${fmt(creamerUtuhMl)} ml`,
       `creamer sisa: ${fmt(val("creamerSisa"))}`,
@@ -392,6 +395,7 @@ export default function Home() {
               <div className="stock-card"><h4>Freshmilk</h4>
                 <div className="field"><label>Freshmilk utuh (jumlah kotak 946 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.fmUtuh} onChange={(e) => updateStock("fmUtuh", e.target.value)} /></div>
                 <div className="field"><label>Freshmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmSisa} onChange={(e) => updateStock("fmSisa", e.target.value)} /></div>
+                <label className="field" style={{display:"flex",alignItems:"center",gap:"10px",flexDirection:"row"}}><input type="checkbox" checked={includeFmKosuUtuh} onChange={(e) => setIncludeFmKosuUtuh(e.target.checked)} /> Hitung FM Kosu utuh</label>
               </div>
               <div className="stock-card"><h4>Creamer</h4>
                 <div className="field"><label>Creamer utuh (jumlah kotak 500 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.creamerKotak} onChange={(e) => updateStock("creamerKotak", e.target.value)} /></div>
