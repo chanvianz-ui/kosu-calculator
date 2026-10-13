@@ -26,8 +26,6 @@ const initialIngredients: Ingredient[] = [
   { id: "fm", name: "Fresh Milk", recipe: "3784", note: "Takaran resep 1 batch" },
   { id: "creamer", name: "Creamer", recipe: "3100", note: "Takaran resep 1 batch" },
   { id: "kopi", name: "Kopi", recipe: "2160", note: "Takaran resep 1 batch" },
-  { id: "richmilk", name: "Richmilk", recipe: "", note: "Isi takaran sendiri jika ingin menghitung persentase" },
-  { id: "oatmilk", name: "Oatmilk", recipe: "", note: "Isi takaran sendiri jika ingin menghitung persentase" },
 ];
 
 function numberValue(value: string, fallback = 0) {
@@ -69,8 +67,8 @@ export default function Home() {
     fmUtuh: "", fmSisa: "", fmKosuSisa: "",
     creamerKotak: "", creamerSisa: "", creamerKosuSisa: "",
     kopiUtuh: "", kopiSisa: "", kopiKosuSisa: "",
-    richmilkUtuh: "", richmilkSisa: "",
-    oatmilkUtuh: "", oatmilkSisa: "",
+    richmilkKotak: "", richmilkSisa: "",
+    oatmilkKotak: "", oatmilkSisa: "",
   });
 
   function updateStock(key: keyof typeof stock, value: string) {
@@ -174,8 +172,12 @@ export default function Home() {
     const creamerUtuhMl = creamerBoxes * 500;
     const creamerTotal = creamerUtuhMl + val("creamerSisa") + numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? "") + val("creamerKosuSisa");
     const kopiTotal = val("kopiUtuh") + val("kopiSisa") + numberValue(ingredients.find((x) => x.id === "kopi")?.recipe ?? "") + val("kopiKosuSisa");
-    const richmilkTotal = val("richmilkUtuh") + val("richmilkSisa");
-    const oatmilkTotal = val("oatmilkUtuh") + val("oatmilkSisa");
+    const richmilkBoxes = val("richmilkKotak");
+    const richmilkUtuhMl = richmilkBoxes * 1000;
+    const richmilkTotal = richmilkUtuhMl + val("richmilkSisa");
+    const oatmilkBoxes = val("oatmilkKotak");
+    const oatmilkUtuhMl = oatmilkBoxes * 1000;
+    const oatmilkTotal = oatmilkUtuhMl + val("oatmilkSisa");
     const lines = [
       `HITUNGAN KOSU (${formatDate(date)})`,
       "",
@@ -197,13 +199,13 @@ export default function Home() {
       `kopi kosu sisa: ${fmt(val("kopiKosuSisa"))}`,
       `total: ${fmt(kopiTotal)}`,
       "",
-      `richmilk utuh: ${fmt(val("richmilkUtuh"))}`,
+      `richmilk utuh: ${fmt(richmilkBoxes)} kotak x 1.000 ml = ${fmt(richmilkUtuhMl)} ml`,
       `richmilk sisa: ${fmt(val("richmilkSisa"))}`,
-      `total: ${fmt(richmilkTotal)}`,
+      `total: ${fmt(richmilkUtuhMl)}+${fmt(val("richmilkSisa"))}=${fmt(richmilkTotal)}`,
       "",
-      `oatmilk utuh: ${fmt(val("oatmilkUtuh"))}`,
+      `oatmilk utuh: ${fmt(oatmilkBoxes)} kotak x 1.000 ml = ${fmt(oatmilkUtuhMl)} ml`,
       `oatmilk sisa: ${fmt(val("oatmilkSisa"))}`,
-      `total: ${fmt(oatmilkTotal)}`,
+      `total: ${fmt(oatmilkUtuhMl)}+${fmt(val("oatmilkSisa"))}=${fmt(oatmilkTotal)}`,
     ];
     // Input kosong ditampilkan sebagai 0 di laporan, dan tidak diingat untuk hitungan berikutnya.
     try {
@@ -307,7 +309,6 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div className="hint-box"><span>i</span><p>Richmilk dan oatmilk tidak memiliki takaran resep default karena rumusnya belum dikonfirmasi. Masukkan sendiri jika ingin menghitung hasil persentasenya.</p></div>
           </section>
 
           <section className="panel stock-panel">
@@ -333,11 +334,11 @@ export default function Home() {
                 <div className="field"><label>Kopi Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiKosuSisa} onChange={(e) => updateStock("kopiKosuSisa", e.target.value)} /></div>
               </div>
               <div className="stock-card"><h4>Richmilk</h4>
-                <div className="field"><label>Richmilk utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.richmilkUtuh} onChange={(e) => updateStock("richmilkUtuh", e.target.value)} /></div>
+                <div className="field"><label>Richmilk utuh (jumlah kotak 1.000 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.richmilkKotak} onChange={(e) => updateStock("richmilkKotak", e.target.value)} /></div>
                 <div className="field"><label>Richmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.richmilkSisa} onChange={(e) => updateStock("richmilkSisa", e.target.value)} /></div>
               </div>
               <div className="stock-card"><h4>Oatmilk</h4>
-                <div className="field"><label>Oatmilk utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.oatmilkUtuh} onChange={(e) => updateStock("oatmilkUtuh", e.target.value)} /></div>
+                <div className="field"><label>Oatmilk utuh (jumlah kotak 1.000 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.oatmilkKotak} onChange={(e) => updateStock("oatmilkKotak", e.target.value)} /></div>
                 <div className="field"><label>Oatmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.oatmilkSisa} onChange={(e) => updateStock("oatmilkSisa", e.target.value)} /></div>
               </div>
             </div>
