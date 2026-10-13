@@ -23,7 +23,7 @@ const HISTORY_KEY = "kosu-calculator-history-v1";
 const SETTINGS_KEY = "kosu-calculator-settings-v1";
 
 const initialIngredients: Ingredient[] = [
-  { id: "fm", name: "Fresh Milk", recipe: "3784", note: "Takaran resep 1 batch" },
+  { id: "fm", name: "Freshmilk", recipe: "3784", note: "Takaran resep 1 batch" },
   { id: "creamer", name: "Creamer", recipe: "3100", note: "Takaran resep 1 batch" },
   { id: "kopi", name: "Kopi", recipe: "2160", note: "Takaran resep 1 batch" },
 ];
@@ -167,7 +167,9 @@ export default function Home() {
     const val = (key: keyof typeof stock) => numberValue(stock[key]);
     const has = (key: keyof typeof stock) => stock[key].trim() !== "";
     const fmt = (n: number) => formatNumber(n, 0);
-    const fmTotal = val("fmUtuh") + val("fmSisa") + numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? "") + val("fmKosuSisa");
+    const fmBoxes = val("fmUtuh");
+    const fmUtuhMl = fmBoxes * 946;
+    const fmTotal = fmUtuhMl + val("fmSisa") + numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? "") + val("fmKosuSisa");
     const creamerBoxes = val("creamerKotak");
     const creamerUtuhMl = creamerBoxes * 500;
     const creamerTotal = creamerUtuhMl + val("creamerSisa") + numberValue(ingredients.find((x) => x.id === "creamer")?.recipe ?? "") + val("creamerKosuSisa");
@@ -181,10 +183,10 @@ export default function Home() {
     const lines = [
       `HITUNGAN KOSU (${formatDate(date)})`,
       "",
-      `fm utuh: ${fmt(val("fmUtuh"))}`,
-      `fm sisa: ${fmt(val("fmSisa"))}`,
-      `fm kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? ""))}`,
-      `fm kosu sisa: ${fmt(val("fmKosuSisa"))}`,
+      `freshmilk utuh: ${fmt(fmBoxes)} kotak x 946 ml = ${fmt(fmUtuhMl)} ml`,
+      `freshmilk sisa: ${fmt(val("fmSisa"))}`,
+      `freshmilk kosu utuh: ${fmt(numberValue(ingredients.find((x) => x.id === "fm")?.recipe ?? ""))}`,
+      `freshmilk kosu sisa: ${fmt(val("fmKosuSisa"))}`,
       `total: ${fmt(fmTotal)}`,
       "",
       `creamer utuh: ${fmt(creamerBoxes)} kotak x 500 ml = ${fmt(creamerUtuhMl)} ml`,
@@ -318,10 +320,10 @@ export default function Home() {
             </div>
             <p className="panel-intro">Isi stok hari ini. Kolom stok tidak disimpan dan akan kosong kembali saat website dibuka ulang. Takaran Kosu utuh diambil dari resep di atas.</p>
             <div className="stock-grid">
-              <div className="stock-card"><h4>Fresh Milk</h4>
-                <div className="field"><label>FM utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmUtuh} onChange={(e) => updateStock("fmUtuh", e.target.value)} /></div>
-                <div className="field"><label>FM sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmSisa} onChange={(e) => updateStock("fmSisa", e.target.value)} /></div>
-                <div className="field"><label>FM Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmKosuSisa} onChange={(e) => updateStock("fmKosuSisa", e.target.value)} /></div>
+              <div className="stock-card"><h4>Freshmilk</h4>
+                <div className="field"><label>Freshmilk utuh (jumlah kotak 946 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.fmUtuh} onChange={(e) => updateStock("fmUtuh", e.target.value)} /></div>
+                <div className="field"><label>Freshmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmSisa} onChange={(e) => updateStock("fmSisa", e.target.value)} /></div>
+                <div className="field"><label>Freshmilk Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.fmKosuSisa} onChange={(e) => updateStock("fmKosuSisa", e.target.value)} /></div>
               </div>
               <div className="stock-card"><h4>Creamer</h4>
                 <div className="field"><label>Creamer utuh (jumlah kotak 500 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.creamerKotak} onChange={(e) => updateStock("creamerKotak", e.target.value)} /></div>
