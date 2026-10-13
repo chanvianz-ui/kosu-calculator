@@ -80,6 +80,8 @@ export default function Home() {
   const [message, setMessage] = useState("");
   // Stok harian sengaja tidak disimpan ke localStorage agar selalu kosong saat membuka ulang.
   const [includeFmKosuUtuh, setIncludeFmKosuUtuh] = useState(true);
+  const [includeCreamerKosuUtuh, setIncludeCreamerKosuUtuh] = useState(true);
+  const [includeKopiKosuUtuh, setIncludeKopiKosuUtuh] = useState(true);
   const [stock, setStock] = useState({
     fmUtuh: "", fmSisa: "",
     creamerKotak: "", creamerSisa: "",
@@ -230,12 +232,12 @@ export default function Home() {
     const creamerUtuhMl = creamerBoxes * 500;
     const creamerKosuUtuh = recipeValue("creamer");
     const creamerKosuSisa = recipeResult("creamer");
-    const creamerTotal = creamerUtuhMl + val("creamerSisa") + creamerKosuUtuh + (kosuCalculated ? creamerKosuSisa : 0);
+    const creamerTotal = creamerUtuhMl + val("creamerSisa") + (includeCreamerKosuUtuh ? creamerKosuUtuh : 0) + (kosuCalculated ? creamerKosuSisa : 0);
     const kopiKosuUtuh = recipeValue("kopi");
     const kopiKosuSisa = recipeResult("kopi");
     // Input kopi sisa adalah berat gross termasuk hopper; kurangi tare hopper 425 gr.
     const kopiSisaNet = Math.max(0, val("kopiSisa") - 425);
-    const kopiTotal = val("kopiUtuh") + kopiSisaNet + kopiKosuUtuh + (kosuCalculated ? kopiKosuSisa : 0);
+    const kopiTotal = val("kopiUtuh") + kopiSisaNet + (includeKopiKosuUtuh ? kopiKosuUtuh : 0) + (kosuCalculated ? kopiKosuSisa : 0);
     const richmilkBoxes = val("richmilkKotak");
     const richmilkUtuhMl = richmilkBoxes * 1000;
     const richmilkTotal = richmilkUtuhMl + val("richmilkSisa");
@@ -254,17 +256,15 @@ export default function Home() {
       "",
       `creamer utuh: ${fmt(creamerBoxes)} kotak x 500 ml = ${fmt(creamerUtuhMl)} ml`,
       `creamer sisa: ${fmt(val("creamerSisa"))}`,
-      `creamer kosu utuh: ${fmt(creamerKosuUtuh)}`,
+      ...(includeCreamerKosuUtuh ? [`creamer kosu utuh: ${fmt(creamerKosuUtuh)}`] : []),
       ...(kosuCalculated ? [`creamer kosu sisa: ${fmt(creamerKosuSisa)}`] : []),
-      kosuCalculated
-        ? `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))} + ${fmt(creamerKosuUtuh)} + ${fmt(creamerKosuSisa)} = ${fmt(creamerTotal)}`
-        : `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))} + ${fmt(creamerKosuUtuh)} = ${fmt(creamerTotal)}`,
+      `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))}${includeCreamerKosuUtuh ? ` + ${fmt(creamerKosuUtuh)}` : ""}${kosuCalculated ? ` + ${fmt(creamerKosuSisa)}` : ""} = ${fmt(creamerTotal)}`,
       "",
       `kopi utuh: ${fmt(val("kopiUtuh"))}`,
       `kopi sisa: ${fmt(kopiSisaNet)}`,
-      `kopi kosu utuh: ${fmt(kopiKosuUtuh)}`,
+      ...(includeKopiKosuUtuh ? [`kopi kosu utuh: ${fmt(kopiKosuUtuh)}`] : []),
       ...(kosuCalculated ? [`kopi kosu sisa: ${fmt(kopiKosuSisa)}`] : []),
-      `total: ${fmt(kopiTotal)}`,
+      `total: ${fmt(val("kopiUtuh"))} + ${fmt(kopiSisaNet)}${includeKopiKosuUtuh ? ` + ${fmt(kopiKosuUtuh)}` : ""}${kosuCalculated ? ` + ${fmt(kopiKosuSisa)}` : ""} = ${fmt(kopiTotal)}`,
       "",
       `richmilk utuh: ${fmt(richmilkUtuhMl)}`,
       `richmilk sisa: ${fmt(val("richmilkSisa"))}`,
@@ -400,10 +400,12 @@ export default function Home() {
               <div className="stock-card"><h4>Creamer</h4>
                 <div className="field"><label>Creamer utuh (jumlah kotak 500 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.creamerKotak} onChange={(e) => updateStock("creamerKotak", e.target.value)} /></div>
                 <div className="field"><label>Creamer sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.creamerSisa} onChange={(e) => updateStock("creamerSisa", e.target.value)} /></div>
+                <label className="field" style={{display:"flex",alignItems:"center",gap:"10px",flexDirection:"row"}}><input type="checkbox" checked={includeCreamerKosuUtuh} onChange={(e) => setIncludeCreamerKosuUtuh(e.target.checked)} /> Hitung Creamer Kosu utuh</label>
               </div>
               <div className="stock-card"><h4>Kopi</h4>
                 <div className="field"><label>Kopi utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiUtuh} onChange={(e) => updateStock("kopiUtuh", e.target.value)} /></div>
                 <div className="field"><label>Kopi sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiSisa} onChange={(e) => updateStock("kopiSisa", e.target.value)} /></div>
+                <label className="field" style={{display:"flex",alignItems:"center",gap:"10px",flexDirection:"row"}}><input type="checkbox" checked={includeKopiKosuUtuh} onChange={(e) => setIncludeKopiKosuUtuh(e.target.checked)} /> Hitung Kopi Kosu utuh</label>
               </div>
               <div className="stock-card"><h4>Richmilk</h4>
                 <div className="field"><label>Richmilk utuh (jumlah kotak 1.000 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.richmilkKotak} onChange={(e) => updateStock("richmilkKotak", e.target.value)} /></div>
