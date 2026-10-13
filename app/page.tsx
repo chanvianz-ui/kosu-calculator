@@ -236,7 +236,7 @@ export default function Home() {
         <div className="hero-stat">
           <span>Patokan Kosu utuh</span>
           <strong>{formatNumber(patokanNum, 0)}</strong>
-          <small>gram Â· bisa diubah</small>
+          <small>gram - bisa diubah</small>
         </div>
       </section>
 
@@ -261,12 +261,12 @@ export default function Home() {
               <div className="weigh-card">
                 <div className="weigh-title"><div className="icon-box" aria-hidden="true">B</div><div><h4>Baskom</h4><p>Berat wadah {formatNumber(numberValue(tareBaskom), 0)} gr</p></div></div>
                 <div className="field"><label htmlFor="basketGross">Berat baskom + isi</label><div className="input-unit"><input id="basketGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 2.702" value={basketGross} onChange={(e) => setBasketGross(e.target.value)} /><span>gr</span></div></div>
-                <div className="net-line"><span>Berat bersih</span><strong>{basketNet === null ? "â€”" : basketNet < 0 ? "Cek angka" : `${formatNumber(basketNet)} gr`}</strong></div>
+                <div className="net-line"><span>Berat bersih</span><strong>{basketNet === null ? "-" : basketNet < 0 ? "Cek angka" : `${formatNumber(basketNet)} gr`}</strong></div>
               </div>
               <div className="weigh-card">
                 <div className="weigh-title"><div className="icon-box" aria-hidden="true">T</div><div><h4>Teko</h4><p>Berat wadah {formatNumber(numberValue(tareTeko), 0)} gr</p></div></div>
                 <div className="field"><label htmlFor="pitcherGross">Berat teko + isi</label><div className="input-unit"><input id="pitcherGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 1.120" value={pitcherGross} onChange={(e) => setPitcherGross(e.target.value)} /><span>gr</span></div></div>
-                <div className="net-line"><span>Berat bersih</span><strong>{pitcherNet === null ? "â€”" : pitcherNet < 0 ? "Cek angka" : `${formatNumber(pitcherNet)} gr`}</strong></div>
+                <div className="net-line"><span>Berat bersih</span><strong>{pitcherNet === null ? "-" : pitcherNet < 0 ? "Cek angka" : `${formatNumber(pitcherNet)} gr`}</strong></div>
               </div>
             </div>
 
@@ -278,11 +278,11 @@ export default function Home() {
 
             <div className="result-card">
               <div className="result-top"><div><p className="eyebrow">HASIL HITUNG</p><h3>Total Kosu sisa</h3></div><div className="result-icon" aria-hidden="true">Total</div></div>
-              <div className="result-number">{remainder === null ? "â€”" : inputValid ? formatNumber(remainder) : "Periksa input"} <span>gram</span></div>
-              <div className="formula-row"><span>Baskom bersih</span><strong>{basketNet === null || basketNet < 0 ? "â€”" : formatNumber(basketNet)} gr</strong></div>
-              <div className="formula-row"><span>Teko bersih</span><strong>{pitcherNet === null || pitcherNet < 0 ? "â€”" : formatNumber(pitcherNet)} gr</strong></div>
-              <div className="formula-row total"><span>Persentase Kosu sisa</span><strong>{percentage === null || !inputValid ? "â€”" : `${formatNumber(percentage)}%`}</strong></div>
-              <p className="formula-note">Persentase = (baskom bersih + teko bersih) Ã· patokan Kosu utuh Ã— 100%</p>
+              <div className="result-number">{remainder === null ? "-" : inputValid ? formatNumber(remainder) : "Periksa input"} <span>gram</span></div>
+              <div className="formula-row"><span>Baskom bersih</span><strong>{basketNet === null || basketNet < 0 ? "-" : formatNumber(basketNet)} gr</strong></div>
+              <div className="formula-row"><span>Teko bersih</span><strong>{pitcherNet === null || pitcherNet < 0 ? "-" : formatNumber(pitcherNet)} gr</strong></div>
+              <div className="formula-row total"><span>Persentase Kosu sisa</span><strong>{percentage === null || !inputValid ? "-" : `${formatNumber(percentage)}%`}</strong></div>
+              <p className="formula-note">Persentase = (baskom bersih + teko bersih) / patokan Kosu utuh x 100%</p>
             </div>
 
             <div className="action-row">
@@ -303,7 +303,7 @@ export default function Home() {
                 <div className="recipe-item" key={item.id}>
                   <div className="recipe-item-head"><div><h4>{item.name}</h4><p>{item.note}</p></div><span className="ingredient-symbol">{item.id === "fm" ? "FM" : item.id === "creamer" ? "CR" : item.id === "kopi" ? "KP" : item.id === "richmilk" ? "RM" : "OM"}</span></div>
                   <div className="field"><label htmlFor={`recipe-${item.id}`}>Takaran resep 1 batch</label><div className="input-unit"><input id={`recipe-${item.id}`} type="number" min="0" inputMode="decimal" placeholder="Isi takaran" value={item.recipe} onChange={(e) => updateIngredient(item.id, e.target.value)} /><span>gr / ml</span></div></div>
-                  <div className="recipe-result"><span>Hasil Ã— {percentage === null || !inputValid ? "â€”" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "â€”" : formatNumber(item.result)}</strong></div>
+                  <div className="recipe-result"><span>Hasil x {percentage === null || !inputValid ? "-" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "-" : formatNumber(item.result)}</strong></div>
                 </div>
               ))}
             </div>
@@ -371,7 +371,7 @@ export default function Home() {
         </section>
       )}
 
-      <footer className="footer"><span>KOSU CALCULATOR</span><span>Dark mode Â· Mobile ready Â· Local storage</span></footer>
+      <footer className="footer"><span>KOSU CALCULATOR</span><span>Dark mode - Mobile ready - Local storage</span></footer>
     </main>
   );
 }
