@@ -218,7 +218,6 @@ export default function Home() {
       return;
     }
     const val = (key: keyof typeof stock) => numberValue(stock[key]);
-    const has = (key: keyof typeof stock) => stock[key].trim() !== "";
     const fmt = (n: number) => formatNumber(n, 0);
     const recipeValue = (id: string) => numberValue(ingredients.find((x) => x.id === id)?.recipe ?? "");
     const recipeResult = (id: string) => calculatedIngredients.find((x) => x.id === id)?.result ?? 0;
@@ -232,8 +231,9 @@ export default function Home() {
     const creamerKosuUtuh = recipeValue("creamer");
     const creamerKosuSisa = recipeResult("creamer");
     const creamerTotal = creamerUtuhMl + val("creamerSisa") + creamerKosuUtuh + creamerKosuSisa;
-    const kopiSisaNet = Math.max(0, val("kopiSisa") - 425);
-    const kopiTotal = val("kopiUtuh") + kopiSisaNet;
+    const kopiKosuUtuh = recipeValue("kopi");
+    const kopiKosuSisa = recipeResult("kopi");
+    const kopiTotal = val("kopiUtuh") + val("kopiSisa") + kopiKosuUtuh + kopiKosuSisa;
     const richmilkBoxes = val("richmilkKotak");
     const richmilkUtuhMl = richmilkBoxes * 1000;
     const richmilkTotal = richmilkUtuhMl + val("richmilkSisa");
@@ -242,30 +242,31 @@ export default function Home() {
     const oatmilkTotal = oatmilkUtuhMl + val("oatmilkSisa");
     const lines = [
       `HITUNGAN KOSU (${formatDate(date)})`,
-      "",
-      `freshmilk utuh: ${fmt(fmBoxes)} kotak x 946 ml = ${fmt(fmUtuhMl)} ml`,
-      `freshmilk sisa: ${fmt(val("fmSisa"))}`,
-      `freshmilk kosu utuh: ${fmt(fmKosuUtuh)}`,
-      `freshmilk kosu sisa: ${fmt(fmKosuSisa)}`,
-      `total: ${fmt(fmUtuhMl)}+${fmt(val("fmSisa"))}+${fmt(fmKosuUtuh)}+${fmt(fmKosuSisa)}=${fmt(fmTotal)}`,
+      `fm utuh: ${fmt(fmUtuhMl)}`,
+      `fm sisa: ${fmt(val("fmSisa"))}`,
+      `fm kosu utuh: ${fmt(fmKosuUtuh)}`,
+      `fm kosu sisa: ${fmt(fmKosuSisa)}`,
+      `total: ${fmt(fmTotal)}`,
       "",
       `creamer utuh: ${fmt(creamerBoxes)} kotak x 500 ml = ${fmt(creamerUtuhMl)} ml`,
       `creamer sisa: ${fmt(val("creamerSisa"))}`,
       `creamer kosu utuh: ${fmt(creamerKosuUtuh)}`,
       `creamer kosu sisa: ${fmt(creamerKosuSisa)}`,
-      `total: ${fmt(creamerUtuhMl)}+${fmt(val("creamerSisa"))}+${fmt(creamerKosuUtuh)}+${fmt(creamerKosuSisa)}=${fmt(creamerTotal)}`,
+      `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))} + ${fmt(creamerKosuUtuh)} + ${fmt(creamerKosuSisa)} = ${fmt(creamerTotal)}`,
       "",
       `kopi utuh: ${fmt(val("kopiUtuh"))}`,
       `kopi sisa: ${fmt(val("kopiSisa"))}`,
+      `kopi kosu utuh: ${fmt(kopiKosuUtuh)}`,
+      `kopi kosu sisa: ${fmt(kopiKosuSisa)}`,
       `total: ${fmt(kopiTotal)}`,
       "",
-      `richmilk utuh: ${fmt(richmilkBoxes)} kotak x 1.000 ml = ${fmt(richmilkUtuhMl)} ml`,
+      `richmilk utuh: ${fmt(richmilkUtuhMl)}`,
       `richmilk sisa: ${fmt(val("richmilkSisa"))}`,
-      `total: ${fmt(richmilkUtuhMl)}+${fmt(val("richmilkSisa"))}=${fmt(richmilkTotal)}`,
+      `total: ${fmt(richmilkTotal)}`,
       "",
-      `oatmilk utuh: ${fmt(oatmilkBoxes)} kotak x 1.000 ml = ${fmt(oatmilkUtuhMl)} ml`,
+      `oatmilk utuh: ${fmt(oatmilkUtuhMl)}`,
       `oatmilk sisa: ${fmt(val("oatmilkSisa"))}`,
-      `total: ${fmt(oatmilkUtuhMl)}+${fmt(val("oatmilkSisa"))}=${fmt(oatmilkTotal)}`,
+      `total: ${fmt(oatmilkTotal)}`,
     ];
     // Input kosong ditampilkan sebagai 0 di laporan, dan tidak diingat untuk hitungan berikutnya.
     try {
