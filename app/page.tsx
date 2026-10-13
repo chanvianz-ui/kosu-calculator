@@ -241,8 +241,8 @@ export default function Home() {
       </section>
 
       <nav className="tabs" aria-label="Navigasi aplikasi">
-        <button className={activeTab === "calculator" ? "tab active" : "tab"} onClick={() => setActiveTab("calculator")}> <span>â—‰</span> Kalkulator </button>
-        <button className={activeTab === "history" ? "tab active" : "tab"} onClick={() => setActiveTab("history")}> <span>â—·</span> Riwayat <b>{history.length}</b></button>
+        <button className={activeTab === "calculator" ? "tab active" : "tab"} onClick={() => setActiveTab("calculator")}> Kalkulator </button>
+        <button className={activeTab === "history" ? "tab active" : "tab"} onClick={() => setActiveTab("history")}> Riwayat <b>{history.length}</b></button>
       </nav>
 
       {activeTab === "calculator" ? (
@@ -259,12 +259,12 @@ export default function Home() {
 
             <div className="weigh-grid">
               <div className="weigh-card">
-                <div className="weigh-title"><div className="icon-box">â–¤</div><div><h4>Baskom</h4><p>Berat wadah {formatNumber(numberValue(tareBaskom), 0)} gr</p></div></div>
+                <div className="weigh-title"><div className="icon-box" aria-hidden="true">B</div><div><h4>Baskom</h4><p>Berat wadah {formatNumber(numberValue(tareBaskom), 0)} gr</p></div></div>
                 <div className="field"><label htmlFor="basketGross">Berat baskom + isi</label><div className="input-unit"><input id="basketGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 2.702" value={basketGross} onChange={(e) => setBasketGross(e.target.value)} /><span>gr</span></div></div>
                 <div className="net-line"><span>Berat bersih</span><strong>{basketNet === null ? "â€”" : basketNet < 0 ? "Cek angka" : `${formatNumber(basketNet)} gr`}</strong></div>
               </div>
               <div className="weigh-card">
-                <div className="weigh-title"><div className="icon-box">â–±</div><div><h4>Teko</h4><p>Berat wadah {formatNumber(numberValue(tareTeko), 0)} gr</p></div></div>
+                <div className="weigh-title"><div className="icon-box" aria-hidden="true">T</div><div><h4>Teko</h4><p>Berat wadah {formatNumber(numberValue(tareTeko), 0)} gr</p></div></div>
                 <div className="field"><label htmlFor="pitcherGross">Berat teko + isi</label><div className="input-unit"><input id="pitcherGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 1.120" value={pitcherGross} onChange={(e) => setPitcherGross(e.target.value)} /><span>gr</span></div></div>
                 <div className="net-line"><span>Berat bersih</span><strong>{pitcherNet === null ? "â€”" : pitcherNet < 0 ? "Cek angka" : `${formatNumber(pitcherNet)} gr`}</strong></div>
               </div>
@@ -277,7 +277,7 @@ export default function Home() {
             </div>
 
             <div className="result-card">
-              <div className="result-top"><div><p className="eyebrow">HASIL HITUNG</p><h3>Total Kosu sisa</h3></div><div className="result-icon">â†—</div></div>
+              <div className="result-top"><div><p className="eyebrow">HASIL HITUNG</p><h3>Total Kosu sisa</h3></div><div className="result-icon" aria-hidden="true">Total</div></div>
               <div className="result-number">{remainder === null ? "â€”" : inputValid ? formatNumber(remainder) : "Periksa input"} <span>gram</span></div>
               <div className="formula-row"><span>Baskom bersih</span><strong>{basketNet === null || basketNet < 0 ? "â€”" : formatNumber(basketNet)} gr</strong></div>
               <div className="formula-row"><span>Teko bersih</span><strong>{pitcherNet === null || pitcherNet < 0 ? "â€”" : formatNumber(pitcherNet)} gr</strong></div>
@@ -286,7 +286,7 @@ export default function Home() {
             </div>
 
             <div className="action-row">
-              <button className="button button-primary" onClick={saveEntry} disabled={!inputValid}>Simpan ke riwayat <span>â†—</span></button>
+              <button className="button button-primary" onClick={saveEntry} disabled={!inputValid}>Simpan ke riwayat</button>
               <button className="button button-secondary" onClick={copySummary} disabled={!inputValid}>Salin hasil</button>
             </div>
             {message && <p className="message" role="status">{message}</p>}
@@ -341,7 +341,7 @@ export default function Home() {
                 <div className="field"><label>Oatmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.oatmilkSisa} onChange={(e) => updateStock("oatmilkSisa", e.target.value)} /></div>
               </div>
             </div>
-            <div className="action-row"><button className="button button-primary" onClick={copySummary} disabled={!inputValid}>Salin laporan stok <span>â†—</span></button></div>
+            <div className="action-row"><button className="button button-primary" onClick={copySummary} disabled={!inputValid}>Salin laporan stok</button></div>
             {message && <p className="message" role="status">{message}</p>}
           </section>
         </div>
@@ -355,7 +355,7 @@ export default function Home() {
             </div>
           </div>
           {history.length === 0 ? (
-            <div className="empty-state"><div className="empty-icon">â—·</div><h4>Belum ada riwayat</h4><p>Simpan hitungan dari tab Kalkulator untuk melihatnya di sini.</p><button className="button button-primary" onClick={() => setActiveTab("calculator")}>Mulai hitung</button></div>
+            <div className="empty-state"><div className="empty-icon">Riwayat</div><h4>Belum ada riwayat</h4><p>Simpan hitungan dari tab Kalkulator untuk melihatnya di sini.</p><button className="button button-primary" onClick={() => setActiveTab("calculator")}>Mulai hitung</button></div>
           ) : (
             <div className="history-list">
               {history.map((entry) => (
@@ -363,7 +363,7 @@ export default function Home() {
                   <div className="history-date"><span>{formatDate(entry.date)}</span><small>Patokan {formatNumber(entry.patokan, 0)}</small></div>
                   <div className="history-metric"><small>Kosu sisa</small><strong>{formatNumber(entry.remainder)} gr</strong></div>
                   <div className="history-metric"><small>Persentase</small><strong className="green-text">{formatNumber(entry.percentage)}%</strong></div>
-                  <button className="icon-button" aria-label={`Hapus riwayat ${formatDate(entry.date)}`} onClick={() => deleteEntry(entry.id)}>Ã—</button>
+                  <button className="icon-button" aria-label={`Hapus riwayat ${formatDate(entry.date)}`} onClick={() => deleteEntry(entry.id)}>Hapus</button>
                 </article>
               ))}
             </div>
@@ -371,7 +371,7 @@ export default function Home() {
         </section>
       )}
 
-      <footer className="footer"><span>â—ˆ KOSU CALCULATOR</span><span>Dark mode Â· Mobile ready Â· Local storage</span></footer>
+      <footer className="footer"><span>KOSU CALCULATOR</span><span>Dark mode Â· Mobile ready Â· Local storage</span></footer>
     </main>
   );
 }
