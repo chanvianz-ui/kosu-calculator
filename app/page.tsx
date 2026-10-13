@@ -213,10 +213,9 @@ export default function Home() {
   }
 
   async function copySummary() {
-    if (!inputValid || remainder === null || percentage === null) {
-      setMessage("Isi berat baskom dan teko dengan angka yang valid terlebih dahulu.");
-      return;
-    }
+    // Laporan stok tetap bisa dibuat walau hari ini tidak menghitung Kosu sisa.
+    // Jika kedua berat valid, baris Kosu sisa dan hasil resep ikut dimasukkan.
+    const kosuCalculated = inputValid && remainder !== null && percentage !== null;
     const val = (key: keyof typeof stock) => numberValue(stock[key]);
     const fmt = (n: number) => formatNumber(n, 0);
     const recipeValue = (id: string) => numberValue(ingredients.find((x) => x.id === id)?.recipe ?? "");
@@ -225,15 +224,17 @@ export default function Home() {
     const fmUtuhMl = fmBoxes * 946;
     const fmKosuUtuh = recipeValue("fm");
     const fmKosuSisa = recipeResult("fm");
-    const fmTotal = fmUtuhMl + val("fmSisa") + fmKosuUtuh + fmKosuSisa;
+    const fmTotal = fmUtuhMl + val("fmSisa") + fmKosuUtuh + (kosuCalculated ? fmKosuSisa : 0);
     const creamerBoxes = val("creamerKotak");
     const creamerUtuhMl = creamerBoxes * 500;
     const creamerKosuUtuh = recipeValue("creamer");
     const creamerKosuSisa = recipeResult("creamer");
-    const creamerTotal = creamerUtuhMl + val("creamerSisa") + creamerKosuUtuh + creamerKosuSisa;
+    const creamerTotal = creamerUtuhMl + val("creamerSisa") + creamerKosuUtuh + (kosuCalculated ? creamerKosuSisa : 0);
     const kopiKosuUtuh = recipeValue("kopi");
     const kopiKosuSisa = recipeResult("kopi");
-    const kopiTotal = val("kopiUtuh") + val("kopiSisa") + kopiKosuUtuh + kopiKosuSisa;
+    // Input kopi sisa adalah berat gross termasuk hopper; kurangi tare hopper 425 gr.
+    const kopiSisaNet = Math.max(0, val("kopiSisa") - 425);
+    const kopiTotal = val("kopiUtuh") + kopiSisaNet + kopiKosuUtuh + (kosuCalculated ? kopiKosuSisa : 0);
     const richmilkBoxes = val("richmilkKotak");
     const richmilkUtuhMl = richmilkBoxes * 1000;
     const richmilkTotal = richmilkUtuhMl + val("richmilkSisa");
@@ -245,19 +246,21 @@ export default function Home() {
       `fm utuh: ${fmt(fmUtuhMl)}`,
       `fm sisa: ${fmt(val("fmSisa"))}`,
       `fm kosu utuh: ${fmt(fmKosuUtuh)}`,
-      `fm kosu sisa: ${fmt(fmKosuSisa)}`,
+      ...(kosuCalculated ? [`fm kosu sisa: ${fmt(fmKosuSisa)}`] : []),
       `total: ${fmt(fmTotal)}`,
       "",
       `creamer utuh: ${fmt(creamerBoxes)} kotak x 500 ml = ${fmt(creamerUtuhMl)} ml`,
       `creamer sisa: ${fmt(val("creamerSisa"))}`,
       `creamer kosu utuh: ${fmt(creamerKosuUtuh)}`,
-      `creamer kosu sisa: ${fmt(creamerKosuSisa)}`,
-      `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))} + ${fmt(creamerKosuUtuh)} + ${fmt(creamerKosuSisa)} = ${fmt(creamerTotal)}`,
+      ...(kosuCalculated ? [`creamer kosu sisa: ${fmt(creamerKosuSisa)}`] : []),
+      kosuCalculated
+        ? `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))} + ${fmt(creamerKosuUtuh)} + ${fmt(creamerKosuSisa)} = ${fmt(creamerTotal)}`
+        : `total: ${fmt(creamerUtuhMl)} + ${fmt(val("creamerSisa"))} + ${fmt(creamerKosuUtuh)} = ${fmt(creamerTotal)}`,
       "",
       `kopi utuh: ${fmt(val("kopiUtuh"))}`,
-      `kopi sisa: ${fmt(val("kopiSisa"))}`,
+      `kopi sisa: ${fmt(kopiSisaNet)}`,
       `kopi kosu utuh: ${fmt(kopiKosuUtuh)}`,
-      `kopi kosu sisa: ${fmt(kopiKosuSisa)}`,
+      ...(kosuCalculated ? [`kopi kosu sisa: ${fmt(kopiKosuSisa)}`] : []),
       `total: ${fmt(kopiTotal)}`,
       "",
       `richmilk utuh: ${fmt(richmilkUtuhMl)}`,
@@ -268,10 +271,11 @@ export default function Home() {
       `oatmilk sisa: ${fmt(val("oatmilkSisa"))}`,
       `total: ${fmt(oatmilkTotal)}`,
     ];
-    // Input kosong ditampilkan sebagai 0 di laporan, dan tidak diingat untuk hitungan berikutnya.
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
-      setMessage("Laporan stok berhasil disalin. Kolom stok tetap kosong saat membuka ulang website.");
+      setMessage(kosuCalculated
+        ? "Laporan stok dan hasil Kosu sisa berhasil disalin."
+        : "Laporan stok berhasil disalin tanpa menghitung Kosu sisa.");
     } catch {
       setMessage("Gagal menyalin otomatis. Pastikan website dibuka melalui HTTPS.");
     }
@@ -356,7 +360,7 @@ export default function Home() {
 
             <div className="action-row">
               <button className="button button-primary" onClick={saveEntry} disabled={!inputValid}>Simpan ke riwayat</button>
-              <button className="button button-secondary" onClick={copySummary} disabled={!inputValid}>Salin hasil</button>
+              <button className="button button-secondary" onClick={copySummary}>Salin hasil</button>
             </div>
             {message && <p className="message" role="status">{message}</p>}
           </section>
@@ -406,7 +410,7 @@ export default function Home() {
                 <div className="field"><label>Oatmilk sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.oatmilkSisa} onChange={(e) => updateStock("oatmilkSisa", e.target.value)} /></div>
               </div>
             </div>
-            <div className="action-row"><button className="button button-primary" onClick={copySummary} disabled={!inputValid}>Salin laporan stok</button></div>
+            <div className="action-row"><button className="button button-primary" onClick={copySummary}>Salin laporan stok</button></div>
             {message && <p className="message" role="status">{message}</p>}
           </section>
         </div>
