@@ -184,7 +184,8 @@ export default function Home() {
     const creamerKosuUtuh = recipeValue("creamer");
     const creamerKosuSisa = recipeResult("creamer");
     const creamerTotal = creamerUtuhMl + val("creamerSisa") + creamerKosuUtuh + creamerKosuSisa;
-    const kopiSisaNet = Math.max(0, val("kopiSisa") - 425);\n    const kopiTotal = val("kopiUtuh") + kopiSisaNet;
+    const kopiSisaNet = Math.max(0, val("kopiSisa") - 425);
+    const kopiTotal = val("kopiUtuh") + kopiSisaNet;
     const richmilkBoxes = val("richmilkKotak");
     const richmilkUtuhMl = richmilkBoxes * 1000;
     const richmilkTotal = richmilkUtuhMl + val("richmilkSisa");
