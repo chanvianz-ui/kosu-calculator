@@ -316,8 +316,8 @@ export default function Home() {
               {calculatedIngredients.map((item) => (
                 <div className="recipe-item" key={item.id}>
                   <div className="recipe-item-head"><div><h4>{item.name}</h4><p>{item.note}</p></div><span className="ingredient-symbol">{item.id === "fm" ? "FM" : item.id === "creamer" ? "CR" : item.id === "kopi" ? "KP" : item.id === "richmilk" ? "RM" : "OM"}</span></div>
-                  <div className="field"><label htmlFor={`recipe-${item.id}`}>Takaran resep 1 batch</label><div className="input-unit"><input id={`recipe-${item.id}`} type="number" min="0" inputMode="decimal" placeholder="Isi takaran" value={item.recipe} onChange={(e) => updateIngredient(item.id, e.target.value)} /><span>gr / ml</span></div></div>
-                  <div className="recipe-result"><span>Hasil x {percentage === null || !inputValid ? "-" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "-" : formatNumber(item.result)}</strong></div>
+                  <div className="field"><label htmlFor={`recipe-${item.id}`}>{item.id === "kopi" ? "Kopi Kosu utuh (takaran 1 batch)" : "Takaran resep 1 batch"}</label><div className="input-unit"><input id={`recipe-${item.id}`} type="number" min="0" inputMode="decimal" placeholder="Isi takaran" value={item.recipe} onChange={(e) => updateIngredient(item.id, e.target.value)} /><span>gr / ml</span></div></div>
+                  <div className="recipe-result"><span>{item.id === "kopi" ? "Kopi Kosu sisa" : "Hasil"} x {percentage === null || !inputValid ? "-" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "-" : formatNumber(item.result)}</strong></div>
                 </div>
               ))}
             </div>
