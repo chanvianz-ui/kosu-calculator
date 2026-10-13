@@ -341,7 +341,6 @@ export default function Home() {
               <div className="stock-card"><h4>Kopi</h4>
                 <div className="field"><label>Kopi utuh</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiUtuh} onChange={(e) => updateStock("kopiUtuh", e.target.value)} /></div>
                 <div className="field"><label>Kopi sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiSisa} onChange={(e) => updateStock("kopiSisa", e.target.value)} /></div>
-                <div className="field"><label>Kopi Kosu sisa</label><input type="number" min="0" inputMode="decimal" placeholder="0" value={stock.kopiKosuSisa} onChange={(e) => updateStock("kopiKosuSisa", e.target.value)} /></div>
               </div>
               <div className="stock-card"><h4>Richmilk</h4>
                 <div className="field"><label>Richmilk utuh (jumlah kotak 1.000 ml)</label><input type="number" min="0" inputMode="numeric" placeholder="Jumlah kotak" value={stock.richmilkKotak} onChange={(e) => updateStock("richmilkKotak", e.target.value)} /></div>
