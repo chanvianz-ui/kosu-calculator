@@ -66,7 +66,7 @@ export default function Home() {
   const [stock, setStock] = useState({
     fmUtuh: "", fmSisa: "",
     creamerKotak: "", creamerSisa: "",
-    kopiUtuh: "", kopiSisa: "", kopiKosuSisa: "",
+    kopiUtuh: "", kopiSisa: "",
     richmilkKotak: "", richmilkSisa: "",
     oatmilkKotak: "", oatmilkSisa: "",
   });
@@ -184,7 +184,7 @@ export default function Home() {
     const creamerKosuUtuh = recipeValue("creamer");
     const creamerKosuSisa = recipeResult("creamer");
     const creamerTotal = creamerUtuhMl + val("creamerSisa") + creamerKosuUtuh + creamerKosuSisa;
-    const kopiTotal = val("kopiUtuh") + val("kopiSisa") + recipeValue("kopi") + val("kopiKosuSisa");
+    const kopiSisaNet = Math.max(0, val("kopiSisa") - 425);\n    const kopiTotal = val("kopiUtuh") + kopiSisaNet;
     const richmilkBoxes = val("richmilkKotak");
     const richmilkUtuhMl = richmilkBoxes * 1000;
     const richmilkTotal = richmilkUtuhMl + val("richmilkSisa");
