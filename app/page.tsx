@@ -1,6 +1,7 @@
  "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 type Ingredient = { id: string; name: string; recipe: string; note: string };
 type HistoryEntry = {
@@ -14,7 +15,20 @@ type HistoryEntry = {
   remainder: number;
   percentage: number;
   recipe: Record<string, number>;
+  staffName?: string;
 };
+
+type CloudRow = { id: number; staff_name: string; created_at: string; data: HistoryEntry };
+
+const STAFF_NAMES = ["Chandra", "Isfa", "Ghani"] as const;
+let supabase: SupabaseClient | null = null;
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return null;
+  if (!supabase) supabase = createClient(url, key);
+  return supabase;
+}
 
 const DEFAULT_TARE_BASKOM = 504;
 const DEFAULT_TARE_TEKO = 170;
@@ -59,6 +73,8 @@ export default function Home() {
   const [pitcherGross, setPitcherGross] = useState("");
   const [ingredients, setIngredients] = useState<Ingredient[]>(initialIngredients);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [staffName, setStaffName] = useState<(typeof STAFF_NAMES)[number]>("Chandra");
+  const [cloudReady, setCloudReady] = useState(false);
   const [activeTab, setActiveTab] = useState<"calculator" | "history">("calculator");
   const [hydrated, setHydrated] = useState(false);
   const [message, setMessage] = useState("");
@@ -77,8 +93,6 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const savedHistory = localStorage.getItem(HISTORY_KEY);
-      if (savedHistory) setHistory(JSON.parse(savedHistory));
       const savedSettings = localStorage.getItem(SETTINGS_KEY);
       if (savedSettings) {
         const settings = JSON.parse(savedSettings);
@@ -99,9 +113,32 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  }, [history, hydrated]);
+    const client = getSupabase();
+    if (!client) {
+      setMessage("Supabase belum terhubung. Periksa Environment Variables di Vercel.");
+      setCloudReady(false);
+      return;
+    }
+    let alive = true;
+    async function loadHistory() {
+      const { data, error } = await client!.from("kosu_history").select("id, staff_name, created_at, data").order("created_at", { ascending: false }).limit(500);
+      if (!alive) return;
+      if (error) {
+        setMessage(`Gagal memuat riwayat Supabase: ${error.message}`);
+        setCloudReady(false);
+        return;
+      }
+      setHistory((data as CloudRow[]).map((row) => ({ ...row.data, id: String(row.id), staffName: row.staff_name })));
+      setCloudReady(true);
+    }
+    void loadHistory();
+    const channel = client.channel("kosu-history-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "kosu_history" }, () => { void loadHistory(); })
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setMessage("Koneksi realtime terputus. Riwayat akan dimuat ulang saat koneksi pulih.");
+      });
+    return () => { alive = false; void client.removeChannel(channel); };
+  }, []);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -127,13 +164,13 @@ export default function Home() {
     setIngredients((current) => current.map((item) => item.id === id ? { ...item, recipe } : item));
   }
 
-  function saveEntry() {
+  async function saveEntry() {
     if (!inputValid || remainder === null || percentage === null) {
       setMessage("Isi berat baskom dan teko dengan angka yang valid terlebih dahulu.");
       return;
     }
     const entry: HistoryEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      id: "pending",
       date,
       patokan: patokanNum,
       basketGross: basketGrossNum!,
@@ -143,14 +180,25 @@ export default function Home() {
       remainder,
       percentage,
       recipe: Object.fromEntries(ingredients.map((item) => [item.id, numberValue(item.recipe, NaN)]).filter(([, v]) => Number.isFinite(v))) as Record<string, number>,
+      staffName,
     };
-    setHistory((current) => [entry, ...current].sort((a, b) => b.date.localeCompare(a.date)));
-    setMessage("Hitungan berhasil disimpan ke riwayat perangkat ini.");
+    const client = getSupabase();
+    if (!client) {
+      setMessage("Supabase belum terhubung. Periksa Environment Variables di Vercel.");
+      return;
+    }
+    setMessage("Menyimpan hitungan ke database...");
+    const { error } = await client.from("kosu_history").insert({ staff_name: staffName, data: entry });
+    if (error) {
+      setMessage(`Gagal menyimpan: ${error.message}`);
+      return;
+    }
+    setMessage("Hitungan berhasil disimpan dan dibagikan ke semua perangkat.");
     setActiveTab("history");
   }
 
-  function deleteEntry(id: string) {
-    setHistory((current) => current.filter((entry) => entry.id !== id));
+  function deleteEntry(_id: string) {
+    setMessage("Penghapusan riwayat bersama dinonaktifkan agar data tim tidak terhapus tanpa sengaja.");
   }
 
   function exportHistory() {
@@ -238,7 +286,7 @@ export default function Home() {
             <h1>Kosu <span>Calculator</span></h1>
           </div>
         </div>
-        <div className="local-pill"><span className="status-dot" /> Tersimpan lokal</div>
+        <div className="local-pill"><span className="status-dot" /> {cloudReady ? "Database realtime aktif" : "Menghubungkan database..."}</div>
       </header>
 
       <section className="hero">
@@ -265,6 +313,12 @@ export default function Home() {
             <div className="section-heading">
               <div><p className="eyebrow">01 / INPUT TIMBANGAN</p><h3>Hitung Kosu sisa</h3></div>
               <span className="step-tag">2 wadah</span>
+            </div>
+            <div className="field date-field">
+              <label htmlFor="staffName">Nama penghitung</label>
+              <select id="staffName" value={staffName} onChange={(e) => setStaffName(e.target.value as (typeof STAFF_NAMES)[number])}>
+                {STAFF_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
             </div>
             <div className="field date-field">
               <label htmlFor="date">Tanggal hitungan</label>
@@ -358,10 +412,10 @@ export default function Home() {
       ) : (
         <section className="panel history-panel">
           <div className="section-heading history-heading">
-            <div><p className="eyebrow">SAVED ON THIS DEVICE</p><h3>Riwayat hitungan</h3><p className="panel-intro">Riwayat hanya tersimpan di browser/perangkat ini.</p></div>
+            <div><p className="eyebrow">SAVED ON THIS DEVICE</p><h3>Riwayat hitungan</h3><p className="panel-intro">Riwayat bersama dari Supabase, diperbarui otomatis antarperangkat.</p></div>
             <div className="history-actions">
               <button className="button button-secondary" onClick={exportHistory} disabled={history.length === 0}>Ekspor JSON</button>
-              <button className="button button-secondary danger-button" onClick={() => { if (window.confirm("Hapus semua riwayat di perangkat ini?")) setHistory([]); }} disabled={history.length === 0}>Hapus semua</button>
+              
             </div>
           </div>
           {history.length === 0 ? (
@@ -370,7 +424,7 @@ export default function Home() {
             <div className="history-list">
               {history.map((entry) => (
                 <article className="history-entry" key={entry.id}>
-                  <div className="history-date"><span>{formatDate(entry.date)}</span><small>Patokan {formatNumber(entry.patokan, 0)}</small></div>
+                  <div className="history-date"><span>{formatDate(entry.date)}</span><small>{entry.staffName || "Penghitung"} Â· Patokan {formatNumber(entry.patokan, 0)}</small></div>
                   <div className="history-metric"><small>Kosu sisa</small><strong>{formatNumber(entry.remainder)} gr</strong></div>
                   <div className="history-metric"><small>Persentase</small><strong className="green-text">{formatNumber(entry.percentage)}%</strong></div>
                   <button className="icon-button" aria-label={`Hapus riwayat ${formatDate(entry.date)}`} onClick={() => deleteEntry(entry.id)}>Hapus</button>
@@ -381,7 +435,7 @@ export default function Home() {
         </section>
       )}
 
-      <footer className="footer"><span>KOSU CALCULATOR</span><span>Dark mode - Mobile ready - Local storage</span></footer>
+      <footer className="footer"><span>KOSU CALCULATOR</span><span>Dark mode - Mobile ready - Supabase realtime</span></footer>
     </main>
   );
 }
