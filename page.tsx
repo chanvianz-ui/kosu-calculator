@@ -218,7 +218,7 @@ export default function Home() {
 
   // Persentase Kosu sisa dibulatkan ke bilangan bulat.
   // Contoh: 114,18% menjadi 114%.
-  // Contoh: 69,51% menjadi 70%.
+  // Contoh: 69,51% menjadi 70%
   // Contoh: 69,49% menjadi 69%.
   const percentage =
     remainder !== null && patokanNum > 0
