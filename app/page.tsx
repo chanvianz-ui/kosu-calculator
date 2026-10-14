@@ -156,8 +156,11 @@ export default function Home() {
   const inputComplete = basketNet !== null && pitcherNet !== null;
   const inputValid = inputComplete && basketNet! >= 0 && pitcherNet! >= 0 && patokanNum > 0;
   const remainder = inputValid ? basketNet! + pitcherNet! : null;
-  const percentage = remainder !== null && patokanNum > 0 ? (remainder / patokanNum) * 100 : null;
-
+  const percentage =
+  remainder !== null && patokanNum > 0
+    ? Math.round((remainder / patokanNum) * 100)
+    : null;
+ 
   const calculatedIngredients = useMemo(() => ingredients.map((item) => {
     const base = item.recipe.trim() === "" ? null : numberValue(item.recipe);
     return { ...item, base, result: base !== null && percentage !== null ? base * percentage / 100 : null };
