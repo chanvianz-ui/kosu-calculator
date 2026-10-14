@@ -750,71 +750,126 @@ export default function Home() {
                     </div>
                   </div>
 
-r</p></div></div>
-                <div className="field"><label htmlFor="pitcherGross">Berat teko + isi</label><div className="input-unit"><input id="pitcherGross" type="number" min="0" inputMode="decimal" placeholder="Contoh: 1.120" value={pitcherGross} onChange={(e) => setPitcherGross(e.target.value)} /><span>gr</span></div></div>
-                <div className="net-line"><span>Berat bersih</span><strong>{pitcherNet === null ? "—" : pitcherNet < 0 ? "Cek angka" : `${formatNumber(pitcherNet)} gr`}</strong></div>
-              </div>
-            </div>
+                  <div className="recipe-result">
+                    <span>
+                      Hasil ×{" "}
+                      {percentage === null || !inputValid
+                        ? "—"
+                        : `${percentage}%`}
+                    </span>
 
-            <div className="field patokan-field">
-              <label htmlFor="patokan">Patokan Kosu utuh (gram)</label>
-              <input id="patokan" type="number" min="1" inputMode="decimal" value={patokan} onChange={(e) => setPatokan(e.target.value)} />
-              <small>Default 9.044. Ubah hanya jika patokan batch berubah.</small>
-            </div>
-
-            <div className="result-card">
-              <div className="result-top"><div><p className="eyebrow">HASIL HITUNG</p><h3>Total Kosu sisa</h3></div><div className="result-icon">↗</div></div>
-              <div className="result-number">{remainder === null ? "—" : inputValid ? formatNumber(remainder) : "Periksa input"} <span>gram</span></div>
-              <div className="formula-row"><span>Baskom bersih</span><strong>{basketNet === null || basketNet < 0 ? "—" : formatNumber(basketNet)} gr</strong></div>
-              <div className="formula-row"><span>Teko bersih</span><strong>{pitcherNet === null || pitcherNet < 0 ? "—" : formatNumber(pitcherNet)} gr</strong></div>
-              <div className="formula-row total"><span>Persentase Kosu sisa</span><strong>{percentage === null || !inputValid ? "—" : `${formatNumber(percentage)}%`}</strong></div>
-              <p className="formula-note">Persentase = (baskom bersih + teko bersih) ÷ patokan Kosu utuh × 100%</p>
-            </div>
-
-            <div className="action-row">
-              <button className="button button-primary" onClick={saveEntry} disabled={!inputValid}>Simpan ke riwayat <span>↗</span></button>
-              <button className="button button-secondary" onClick={copySummary} disabled={!inputValid}>Salin hasil</button>
-            </div>
-            {message && <p className="message" role="status">{message}</p>}
-          </section>
-
-          <section className="panel recipe-panel">
-            <div className="section-heading">
-              <div><p className="eyebrow">02 / HASIL RESEP</p><h3>Persentase ke bahan</h3></div>
-              <span className="step-tag">Editable</span>
-            </div>
-            <p className="panel-intro">Persentase Kosu diterapkan ke takaran 1 batch. Takaran bisa diubah. Bahan tanpa rumus yang dikonfirmasi dibiarkan kosong.</p>
-            <div className="recipe-list">
-              {calculatedIngredients.map((item) => (
-                <div className="recipe-item" key={item.id}>
-                  <div className="recipe-item-head"><div><h4>{item.name}</h4><p>{item.note}</p></div><span className="ingredient-symbol">{item.id === "fm" ? "FM" : item.id === "creamer" ? "CR" : item.id === "kopi" ? "KP" : item.id === "richmilk" ? "RM" : "OM"}</span></div>
-                  <div className="field"><label htmlFor={`recipe-${item.id}`}>Takaran resep 1 batch</label><div className="input-unit"><input id={`recipe-${item.id}`} type="number" min="0" inputMode="decimal" placeholder="Isi takaran" value={item.recipe} onChange={(e) => updateIngredient(item.id, e.target.value)} /><span>gr / ml</span></div></div>
-                  <div className="recipe-result"><span>Hasil × {percentage === null || !inputValid ? "—" : `${formatNumber(percentage)}%`}</span><strong>{item.result === null || !inputValid ? "—" : formatNumber(item.result)}</strong></div>
+                    <strong>
+                      {item.result === null || !inputValid
+                        ? "—"
+                        : formatNumber(item.result)}
+                    </strong>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="hint-box"><span>i</span><p>Richmilk dan oatmilk tidak memiliki takaran resep default karena rumusnya belum dikonfirmasi. Masukkan sendiri jika ingin menghitung hasil persentasenya.</p></div>
+
+            <div className="hint-box">
+              <span>i</span>
+              <p>
+                Richmilk dan oatmilk tidak memiliki takaran
+                resep default karena rumusnya belum
+                dikonfirmasi. Masukkan sendiri jika ingin
+                menghitung hasil persentasenya.
+              </p>
+            </div>
           </section>
         </div>
       ) : (
         <section className="panel history-panel">
           <div className="section-heading history-heading">
-            <div><p className="eyebrow">SAVED ON THIS DEVICE</p><h3>Riwayat hitungan</h3><p className="panel-intro">Riwayat hanya tersimpan di browser/perangkat ini.</p></div>
+            <div>
+              <p className="eyebrow">SAVED ON THIS DEVICE</p>
+              <h3>Riwayat hitungan</h3>
+              <p className="panel-intro">
+                Riwayat hanya tersimpan di browser/perangkat ini.
+              </p>
+            </div>
+
             <div className="history-actions">
-              <button className="button button-secondary" onClick={exportHistory} disabled={history.length === 0}>Ekspor JSON</button>
-              <button className="button button-secondary danger-button" onClick={() => { if (window.confirm("Hapus semua riwayat di perangkat ini?")) setHistory([]); }} disabled={history.length === 0}>Hapus semua</button>
+              <button
+                className="button button-secondary"
+                onClick={exportHistory}
+                disabled={history.length === 0}
+              >
+                Ekspor JSON
+              </button>
+
+              <button
+                className="button button-secondary danger-button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Hapus semua riwayat di perangkat ini?"
+                    )
+                  ) {
+                    setHistory([]);
+                  }
+                }}
+                disabled={history.length === 0}
+              >
+                Hapus semua
+              </button>
             </div>
           </div>
+
           {history.length === 0 ? (
-            <div className="empty-state"><div className="empty-icon">◷</div><h4>Belum ada riwayat</h4><p>Simpan hitungan dari tab Kalkulator untuk melihatnya di sini.</p><button className="button button-primary" onClick={() => setActiveTab("calculator")}>Mulai hitung</button></div>
+            <div className="empty-state">
+              <div className="empty-icon">◷</div>
+              <h4>Belum ada riwayat</h4>
+              <p>
+                Simpan hitungan dari tab Kalkulator untuk
+                melihatnya di sini.
+              </p>
+
+              <button
+                className="button button-primary"
+                onClick={() => setActiveTab("calculator")}
+              >
+                Mulai hitung
+              </button>
+            </div>
           ) : (
             <div className="history-list">
               {history.map((entry) => (
-                <article className="history-entry" key={entry.id}>
-                  <div className="history-date"><span>{formatDate(entry.date)}</span><small>Patokan {formatNumber(entry.patokan, 0)}</small></div>
-                  <div className="history-metric"><small>Kosu sisa</small><strong>{formatNumber(entry.remainder)} gr</strong></div>
-                  <div className="history-metric"><small>Persentase</small><strong className="green-text">{formatNumber(entry.percentage)}%</strong></div>
-                  <button className="icon-button" aria-label={`Hapus riwayat ${formatDate(entry.date)}`} onClick={() => deleteEntry(entry.id)}>×</button>
+                <article
+                  className="history-entry"
+                  key={entry.id}
+                >
+                  <div className="history-date">
+                    <span>{formatDate(entry.date)}</span>
+                    <small>
+                      Patokan {formatNumber(entry.patokan, 0)}
+                    </small>
+                  </div>
+
+                  <div className="history-metric">
+                    <small>Kosu sisa</small>
+                    <strong>
+                      {formatNumber(entry.remainder)} gr
+                    </strong>
+                  </div>
+
+                  <div className="history-metric">
+                    <small>Persentase</small>
+                    <strong className="green-text">
+                      {entry.percentage}%
+                    </strong>
+                  </div>
+
+                  <button
+                    className="icon-button"
+                    aria-label={`Hapus riwayat ${formatDate(
+                      entry.date
+                    )}`}
+                    onClick={() => deleteEntry(entry.id)}
+                  >
+                    ×
+                  </button>
                 </article>
               ))}
             </div>
@@ -822,7 +877,10 @@ r</p></div></div>
         </section>
       )}
 
-      <footer className="footer"><span>◈ KOSU CALCULATOR</span><span>Dark mode · Mobile ready · Local storage</span></footer>
+      <footer className="footer">
+        <span>◈ KOSU CALCULATOR</span>
+        <span>Dark mode · Mobile ready · Local storage</span>
+      </footer>
     </main>
   );
 }
