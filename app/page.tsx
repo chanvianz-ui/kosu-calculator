@@ -107,8 +107,13 @@ export default function Home() {
           // Only the confirmed recipe ingredients belong in section 02.
           const allowedIds = new Set(["fm", "air", "creamer", "kopi"]);
           const cleaned = settings.ingredients.filter((item: Ingredient) => allowedIds.has(item.id));
-          // Merge defaults so newly confirmed ingredients also appear for existing users.
-          setIngredients(initialIngredients.map((defaultItem) => cleaned.find((item: Ingredient) => item.id === defaultItem.id) ?? defaultItem));
+          // One-time recipe migration: replace the old FM base and add the confirmed water base.
+          // Keep other saved recipe edits, then preserve user edits on future visits.
+          const migrated = settings.recipeVersion !== 2;
+          setIngredients(initialIngredients.map((defaultItem) => {
+            if (migrated && (defaultItem.id === "fm" || defaultItem.id === "air")) return defaultItem;
+            return cleaned.find((item: Ingredient) => item.id === defaultItem.id) ?? defaultItem;
+          }));
         }
       }
     } catch {
@@ -147,7 +152,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ patokan, tareBaskom, tareTeko, ingredients }));
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ patokan, tareBaskom, tareTeko, ingredients, recipeVersion: 2 }));
   }, [patokan, tareBaskom, tareTeko, ingredients, hydrated]);
 
   const patokanNum = numberValue(patokan);
