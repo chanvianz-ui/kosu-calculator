@@ -37,7 +37,8 @@ const HISTORY_KEY = "kosu-calculator-history-v1";
 const SETTINGS_KEY = "kosu-calculator-settings-v1";
 
 const initialIngredients: Ingredient[] = [
-  { id: "fm", name: "Freshmilk", recipe: "3784", note: "Takaran resep 1 batch" },
+  { id: "fm", name: "Freshmilk", recipe: "3311", note: "Takaran resep 1 batch" },
+  { id: "air", name: "Air", recipe: "473", note: "Takaran resep 1 batch" },
   { id: "creamer", name: "Creamer", recipe: "3100", note: "Takaran resep 1 batch" },
   { id: "kopi", name: "Kopi", recipe: "2160", note: "Takaran resep 1 batch" },
 ];
@@ -104,9 +105,10 @@ export default function Home() {
         if (settings.tareTeko !== undefined) setTareTeko(String(settings.tareTeko));
         if (settings.ingredients) {
           // Only the confirmed recipe ingredients belong in section 02.
-          const allowedIds = new Set(["fm", "creamer", "kopi"]);
+          const allowedIds = new Set(["fm", "air", "creamer", "kopi"]);
           const cleaned = settings.ingredients.filter((item: Ingredient) => allowedIds.has(item.id));
-          setIngredients(cleaned.length ? cleaned : initialIngredients);
+          // Merge defaults so newly confirmed ingredients also appear for existing users.
+          setIngredients(initialIngredients.map((defaultItem) => cleaned.find((item: Ingredient) => item.id === defaultItem.id) ?? defaultItem));
         }
       }
     } catch {
