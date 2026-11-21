@@ -37,7 +37,7 @@ const HISTORY_KEY = "kosu-calculator-history-v1";
 const SETTINGS_KEY = "kosu-calculator-settings-v1";
 
 const initialIngredients: Ingredient[] = [
-  { id: "fm", name: "Freshmilk", recipe: "3311", note: "Takaran resep 1 batch" },
+  { id: "fm", name: "Freshmilk", recipe: "3784", note: "Takaran resep 1 batch" },
   { id: "air", name: "Air", recipe: "473", note: "Takaran resep 1 batch" },
   { id: "creamer", name: "Creamer", recipe: "3100", note: "Takaran resep 1 batch" },
   { id: "kopi", name: "Kopi", recipe: "2160", note: "Takaran resep 1 batch" },
@@ -109,7 +109,7 @@ export default function Home() {
           const cleaned = settings.ingredients.filter((item: Ingredient) => allowedIds.has(item.id));
           // One-time recipe migration: replace the old FM base and add the confirmed water base.
           // Keep other saved recipe edits, then preserve user edits on future visits.
-          const migrated = settings.recipeVersion !== 2;
+          const migrated = settings.recipeVersion !== 3;
           setIngredients(initialIngredients.map((defaultItem) => {
             if (migrated && (defaultItem.id === "fm" || defaultItem.id === "air")) return defaultItem;
             return cleaned.find((item: Ingredient) => item.id === defaultItem.id) ?? defaultItem;
@@ -152,7 +152,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ patokan, tareBaskom, tareTeko, ingredients, recipeVersion: 2 }));
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ patokan, tareBaskom, tareTeko, ingredients, recipeVersion: 3 }));
   }, [patokan, tareBaskom, tareTeko, ingredients, hydrated]);
 
   const patokanNum = numberValue(patokan);
